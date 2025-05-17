@@ -35,7 +35,7 @@ public class ManhwaServiceJson {
     }
 
     public Manhwa inserirOuAtualizar(Manhwa manhwa) {
-        List<Manhwa> manhwas = listarTodos(); 
+        List<Manhwa> manhwas = new ArrayList<>(listarTodos()); 
 
         if (manhwa.getId() == null) { 
             // Gera novo ID
@@ -53,7 +53,7 @@ public class ManhwaServiceJson {
     }
 
     public void deletarPorId(Long id) {
-        List<Manhwa> manhwas = listarTodos();
+        List<Manhwa> manhwas = new ArrayList<>(listarTodos());
         manhwas.removeIf(m -> m.getId().equals(id));
         salvarArquivo(manhwas);
     }
