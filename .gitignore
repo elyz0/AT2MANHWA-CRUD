@@ -1,0 +1,25 @@
+# Compilados Java
+*.class
+
+# Diretório de build do Maven
+target/
+
+# Arquivos de log
+*.log
+
+# Arquivos temporários
+*.tmp
+*.bak
+*.swp
+*~
+
+# Configurações do VS Code
+.vscode/
+
+# Configuração de ambiente
+.env
+
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
