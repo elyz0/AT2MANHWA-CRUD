@@ -13,13 +13,15 @@ public class ManhwaServiceJson {
     private final File arquivo = new File("manhwas.json");
  
     //Pesquisar TypeReference 
-    
+     
+    //Sanitizar aqui tbm porque o json pode ter sido editado manualmente
     public List<Manhwa> listarTodos() { 
          
         if (!arquivo.exists()) return new ArrayList<>(); 
 
         try {
-            return Arrays.asList(mapper.readValue(arquivo, Manhwa[].class));
+            Manhwa[] manhwaArray = mapper.readValue(arquivo, Manhwa[].class);
+            return sanitizeList(Arrays.asList(manhwaArray));
         }  
         catch (Exception e) {
             return new ArrayList<>();
@@ -36,6 +38,8 @@ public class ManhwaServiceJson {
 
     public Manhwa inserirOuAtualizar(Manhwa manhwa) {
         List<Manhwa> manhwas = new ArrayList<>(listarTodos()); 
+ 
+        sanitizeManhwa(manhwa); 
 
         if (manhwa.getId() == null) { 
             // Gera novo ID
@@ -53,7 +57,7 @@ public class ManhwaServiceJson {
     }
 
     public void deletarPorId(Long id) {
-        List<Manhwa> manhwas = new ArrayList<>(listarTodos());
+        List<Manhwa> manhwas = listarTodos();
         manhwas.removeIf(m -> m.getId().equals(id));
         salvarArquivo(manhwas);
     }
@@ -65,6 +69,53 @@ public class ManhwaServiceJson {
             e.printStackTrace();
         } 
         //especificar quais exceções realmente podem ocorrer (melhor opçõs)
+    } 
+     
+    private void sanitizeManhwa(Manhwa m) {
+        if (m.getTitulo() != null) {
+            m.setTitulo(m.getTitulo().trim());
+        }
+        if (m.getAutor() != null) {
+            m.setAutor(m.getAutor().trim());
+        }
+        if (m.getGenero() != null) {
+            m.setGenero(m.getGenero().trim().toLowerCase());
+        }
+        if (m.getStatus() != null) {
+            m.setStatus(m.getStatus().trim().toLowerCase());
+        }
+        if (m.getDescricao() != null) {
+            m.setDescricao(m.getDescricao().trim());
+        }
+        if (m.getCapa() != null) {
+            m.setCapa(m.getCapa().trim());
+        }
+
+        // Nota deve estar entre 0.0 e 10.0
+        if (m.getNota() != null) {
+            double nota = m.getNota();
+            if (nota < 0.0) m.setNota(0.0);
+            if (nota > 10.0) m.setNota(10.0);
+        }
+    } 
+      
+    private boolean isValid(Manhwa m) {
+    return m != null
+        && m.getId() == null || m.getId() >= 0 // ID pode ser null se for novo
+        && m.getTitulo() != null && !m.getTitulo().isBlank();
     }
+
+    private List<Manhwa> sanitizeList(List<Manhwa> manhwas) {
+    List<Manhwa> list = new ArrayList<>();
+    for (Manhwa m : manhwas) {
+        if (isValid(m)) {
+            sanitizeManhwa(m); // ou ManhwaSanitizer.sanitize(m);
+            list.add(m);
+        }
+    }
+    return list;
+}
+
+
 }
 
